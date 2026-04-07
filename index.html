@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz App</title>
+  <script src="https://unpkg.com/vue@3"></script>
+</head>
+
+<body>
+
+    <!-- qui creiamo un div con id "app" che sarà il nostro punto di montaggio per l'app Vue -->
+<div id="app">
+  <h1>{{ question }}</h1>
+
+   <!-- qui usiamo v-for per creare un pulsante per ogni opzione, e @click per chiamare la funzione checkAnswer quando viene cliccato -->
+  <button               
+    v-for="option in options" 
+    @click="checkAnswer(option)"
+  >
+    {{ option }}
+  </button>
+
+  <p v-if="result">{{ result }}</p>
+</div>
+
+<script>
+const { createApp } = Vue;
+
+createApp({
+  data() {              //qui mettiamo i dati del nostro quiz, come la domanda, le opzioni e la risposta corretta
+    return {
+      question: "Qual è la capitale d'Italia?",
+      options: ["Roma", "Milano", "Napoli", "Torino"],
+      correctAnswer: "Roma",
+      result: ""
+    }
+  },
+  methods: {                    //qui definiamo la funzione checkAnswer che confronta l'opzione selezionata con la risposta corretta e aggiorna il risultato di conseguenza
+    checkAnswer(option) {
+      if (option === this.correctAnswer) {
+        this.result = "✅ Corretto!";
+      } else {
+        this.result = "❌ Sbagliato!";
+      }
+    }
+  }
+}).mount('#app');   //qui montiamo l'app Vue sul div con id "app"
+</script>
+
+</body>
+</html>
