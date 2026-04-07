@@ -16,11 +16,21 @@
   <button               
     v-for="option in options" 
     @click="checkAnswer(option)"
+    :disabled="answered"  
   >
     {{ option }}
   </button>
+  <br>
+  <button @click="nextQuestion" :disabled="!answered"> <!-- disabilitiamo il pulsante "Next Question" finché l'utente non ha risposto alla domanda corrente -->
+  Next Question
+  </button>
 
-  <p v-if="result">{{ result }}</p>
+  <p v-if="result"
+  >{{ result }}</p>
+
+  <p>Punteggio: {{ score }}</p> 
+  <!-- mostriamo il punteggio attuale dell'utente -->
+
 </div>
 
 <script>
@@ -33,7 +43,9 @@ createApp({
       question: "",
       options: [],
       correctAnswer: "",
-      result: ""
+      result: "",
+      answered: false,
+      score : 0
     }
   },
 
@@ -53,23 +65,41 @@ createApp({
 
       // mischiamo le risposte
       this.options.sort(() => Math.random() - 0.5);  // mescoliamo le opzioni in modo casuale per evitare che la risposta corretta sia sempre alla fine
+      
+    },
+
+    nextQuestion() {
+      this.result = ""; // pulisce il risultato precedente
+      this.answered = false; // resetta lo stato di risposta
+      this.fetchQuestion(); // carica una nuova domanda
+      this.score = 0; // resetta il punteggio quando si passa alla domanda successiva
     },
 
     //
     checkAnswer(option) {
-      if (option === this.correctAnswer) {
-        this.result = "✅ Corretto!";
-      } else {
-        this.result = "❌ Sbagliato!";
-      }
-    }
+  if (this.answered) return; // blocca click multipli
+
+  this.answered = true;
+
+  if (option === this.correctAnswer) {
+    this.result = "✅ Corretto!";
+    this.score++; // incrementa il punteggio se la risposta è corretta
+  } else {
+    this.result = "❌ Sbagliato!";
+  }
   },
+  },
+  
+
+
+
 // qui usiamo il ciclo di vita "mounted" per chiamare la funzione fetchQuestion quando l'app viene montata, in modo da caricare subito una domanda quando l'utente apre la pagina
   mounted() {
     this.fetchQuestion();
   }
 }).mount('#app');
 </script>
+
 
 </body>
 </html>
