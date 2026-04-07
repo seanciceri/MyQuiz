@@ -9,7 +9,8 @@
 
     <!-- qui creiamo un div con id "app" che sarà il nostro punto di montaggio per l'app Vue -->
 <div id="app">
-  <h1>{{ question }}</h1>
+  <h1 v-html="question"></h1> <!-- v-html ci permette di interpretare il testo come HTML, utile per le domande che contengono caratteri speciali -->
+  
 
    <!-- qui usiamo v-for per creare un pulsante per ogni opzione, e @click per chiamare la funzione checkAnswer quando viene cliccato -->
   <button               
@@ -25,16 +26,36 @@
 <script>
 const { createApp } = Vue;
 
+// qui creiamo l'app Vue e definiamo i dati e i metodi necessari per il funzionamento del quiz
 createApp({
-  data() {              //qui mettiamo i dati del nostro quiz, come la domanda, le opzioni e la risposta corretta
+  data() {
     return {
-      question: "Qual è la capitale d'Italia?",
-      options: ["Roma", "Milano", "Napoli", "Torino"],
-      correctAnswer: "Roma",
+      question: "",
+      options: [],
+      correctAnswer: "",
       result: ""
     }
   },
-  methods: {                    //qui definiamo la funzione checkAnswer che confronta l'opzione selezionata con la risposta corretta e aggiorna il risultato di conseguenza
+
+// qui definiamo i metodi per recuperare la domanda dal API e per verificare la risposta dell'utente
+  methods: {
+    async fetchQuestion() {  // usiamo fetch per recuperare una domanda dal API di Open Trivia DB
+      const response = await fetch("https://opentdb.com/api.php?amount=1&type=multiple"); // chiediamo una domanda con 4 opzioni (multiple choice)
+      const data = await response.json(); // convertiamo la risposta in JSON
+
+      const q = data.results[0]; // prendiamo la prima domanda (data.results è un array, ma noi ne vogliamo solo una)
+
+      this.question = q.question;   // salviamo la domanda
+      this.correctAnswer = q.correct_answer;  // salviamo la risposta corretta
+
+      // uniamo risposte corrette + sbagliate
+      this.options = [...q.incorrect_answers, q.correct_answer]; // creiamo un array con tutte le opzioni (corretta + sbagliate)
+
+      // mischiamo le risposte
+      this.options.sort(() => Math.random() - 0.5);  // mescoliamo le opzioni in modo casuale per evitare che la risposta corretta sia sempre alla fine
+    },
+
+    //
     checkAnswer(option) {
       if (option === this.correctAnswer) {
         this.result = "✅ Corretto!";
@@ -42,8 +63,12 @@ createApp({
         this.result = "❌ Sbagliato!";
       }
     }
+  },
+// qui usiamo il ciclo di vita "mounted" per chiamare la funzione fetchQuestion quando l'app viene montata, in modo da caricare subito una domanda quando l'utente apre la pagina
+  mounted() {
+    this.fetchQuestion();
   }
-}).mount('#app');   //qui montiamo l'app Vue sul div con id "app"
+}).mount('#app');
 </script>
 
 </body>
